@@ -1,0 +1,45 @@
+diff --git a/g2o/stuff/filesys_tools.cpp b/g2o/stuff/filesys_tools.cpp
+index 29e33fd..6be580e 100644
+--- a/g2o/stuff/filesys_tools.cpp
++++ b/g2o/stuff/filesys_tools.cpp
+@@ -51,6 +51,7 @@
+ #ifdef __APPLE__
+ //#include <chrono>
+ //#include <thread>
++#include <TargetConditionals.h>
+ #endif
+ 
+ using namespace ::std;
+@@ -134,7 +135,7 @@ std::vector<std::string> getFilesByPattern(const char* pattern)
+     FindClose(hFind);
+   }
+   
+-#elif (defined (UNIX) || defined (CYGWIN)) && !defined(ANDROID)
++#elif (defined (UNIX) || defined (CYGWIN)) && !defined(ANDROID) && !TARGET_IPHONE_SIMULATOR && !TARGET_OS_IPHONE
+ 
+   wordexp_t p;
+   wordexp(pattern, &p, 0);
+diff --git a/g2o/stuff/string_tools.cpp b/g2o/stuff/string_tools.cpp
+index 0a4f60a..493510f 100644
+--- a/g2o/stuff/string_tools.cpp
++++ b/g2o/stuff/string_tools.cpp
+@@ -41,6 +41,10 @@
+ #include <wordexp.h>
+ #endif
+ 
++#ifdef __APPLE__
++#include <TargetConditionals.h>
++#endif
++
+ namespace g2o {
+ 
+ using namespace std;
+@@ -123,7 +127,7 @@ int strPrintf(std::string& str, const char* fmt, ...)
+ 
+ std::string strExpandFilename(const std::string& filename)
+ {
+-#if (defined (UNIX) || defined(CYGWIN)) && !defined(ANDROID)
++#if (defined (UNIX) || defined(CYGWIN)) && !defined(ANDROID)  && !TARGET_IPHONE_SIMULATOR && !TARGET_OS_IPHONE
+   string result = filename;
+   wordexp_t p;
+ 
