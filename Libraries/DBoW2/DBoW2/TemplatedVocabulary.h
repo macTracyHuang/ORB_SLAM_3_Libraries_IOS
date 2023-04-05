@@ -30,6 +30,7 @@
 #include "FeatureVector.h"
 #include "BowVector.h"
 #include "ScoringObject.h"
+#include <chrono>
 
 #include "../DUtils/Random.h"
 
@@ -1481,29 +1482,41 @@ bool TemplatedVocabulary<TDescriptor,F>::loadFromBinaryFile(const std::string &f
   m_nodes.resize(nb_nodes+1);
   m_nodes[0].id = 0;
   char buf[size_node]; int nid = 1;
-  while (!f.eof()) {
-	f.read(buf, size_node);
-	m_nodes[nid].id = nid;
+  
+  // Allcate memory for all descriptors
+  int nMaxNumDes = 1082174;//1082074
+  int nIndx = 0;
+  vector<TDescriptor> vDes(nMaxNumDes,cv::Mat(1, F::L, CV_8U));
 
-	// FIXME
-	const int* ptr=(int*)buf;
-	m_nodes[nid].parent = *ptr;
-	//m_nodes[nid].parent = *(const int*)buf;
-	m_nodes[m_nodes[nid].parent].children.push_back(nid);
-	m_nodes[nid].descriptor = cv::Mat(1, F::L, CV_8U);
- 
-	memcpy(m_nodes[nid].descriptor.data, buf+4, F::L);
-	m_nodes[nid].weight = *(float*)(buf+4+F::L);
-	if (buf[8+F::L]) { // is leaf
-	  int wid = m_words.size();
-	  m_words.resize(wid+1);
-	  m_nodes[nid].word_id = wid;
-	  m_words[wid] = &m_nodes[nid];
-	}
-	else
-	  m_nodes[nid].children.reserve(m_k);
-	nid+=1;
+  while (!f.eof()) {
+    
+    f.read(buf, size_node);
+    m_nodes[nid].id = nid;
+
+    const int* ptr=(int*)buf;
+    m_nodes[nid].parent = *ptr;
+    m_nodes[m_nodes[nid].parent].children.push_back(nid);
+    // auto start_time = std::chrono::high_resolution_clock::now(); // start timing the iteration
+    // m_nodes[nid].descriptor = cv::Mat(1, F::L, CV_8U); // this is the line that takes the most time
+    m_nodes[nid].descriptor = vDes[nIndx++];
+    // auto end_time = std::chrono::high_resolution_clock::now(); // end timing the iteration
+    // auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count(); // calculate elapsed time in microseconds
+    // std::cout << "Iteration " << nid << " took elapsed_time " << elapsed_time << " microseconds" << std::endl; // print elapsed time for this iteration
+    
+    memcpy(m_nodes[nid].descriptor.data, buf+4, F::L);
+    m_nodes[nid].weight = *(float*)(buf+4+F::L);
+    if (buf[8+F::L]) { // is leaf
+      int wid = m_words.size();
+      m_words.resize(wid+1);
+      m_nodes[nid].word_id = wid;
+      m_words[wid] = &m_nodes[nid];
+    }
+    else
+      m_nodes[nid].children.reserve(m_k);
+    nid+=1;
+
   }
+
   f.close();
   return true;
 }

@@ -1,0 +1,51 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+*.vscode
+*lib
+
+Libraries/boost_1_59_0
+Libraries/flann
+Libraries/eigen-3.3.9
+Libraries/include
+Libraries/lib
+Libraries/opencv
+Libraries/opencv_contrib
+Libraries/pcl
+Libraries/share
+Libraries/VTK
+
+*/build
+*.tar.gz
+*.tar.xz
+*.DS_Store
